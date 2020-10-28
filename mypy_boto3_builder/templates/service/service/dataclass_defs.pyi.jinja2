@@ -1,0 +1,30 @@
+"""
+Main interface for {{ package.service_name.boto3_name }} service type dataclasses.
+
+Usage::
+
+    ```python
+    from {{ package.service_name.module_name }}.dataclass_defs import {{ package.typed_dicts[0].dataclass_name }}
+
+    data: {{ package.typed_dicts[0].dataclass_name }} = {{ package.typed_dicts[0].dataclass_name }}(...)
+    ```
+"""
+{% for import_record in package.get_dataclass_defs_required_import_records() -%}
+    {% include "common/import_record_fallback.py.jinja2" with context %}
+{% endfor -%}
+
+{{ "\n\n" -}}
+
+__all__ = (
+{% for typed_dict in package.typed_dicts -%}
+    {{ '"' -}}
+    {{ typed_dict.dataclass_name -}}
+    {{ '"' -}}
+    {{ ",\n" if not loop.last or loop.first else "\n" -}}
+{% endfor -%}
+)
+
+{% for typed_dict in package.typed_dicts -%}
+    {% include "common/dataclass.py.jinja2" with context -%}
+    {{ "\n" -}}
+{% endfor -%}

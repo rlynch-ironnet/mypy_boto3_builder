@@ -204,3 +204,25 @@ class ServicePackage(Package):
                 import_records.add(import_record.get_external(self.service_name.module_name))
 
         return list(sorted(import_records))
+
+    def get_dataclass_defs_required_import_records(self) -> List[ImportRecord]:
+        if not self.typed_dicts:
+            return []
+
+        import_records: Set[ImportRecord] = set()
+        import_records.add(ImportRecord(ImportString("sys")))
+        import_records.add(ImportRecord(ImportString("typing"), "Optional"))
+        import_records.add(ImportRecord(ImportString("dataclasses"), "dataclass"))
+        import_records.add(ImportRecord(ImportString("dataclasses"), "field"))
+        import_records.add(ImportRecord(ImportString("dataclasses_json"), "DataClassJsonMixin"))
+        import_records.add(ImportRecord(ImportString("dataclasses_json"), "config"))
+        for types_dict in self.typed_dicts:
+            for type_annotation in types_dict.get_children_types():
+                import_record = type_annotation.get_import_record()
+                if not import_record or import_record.is_builtins():
+                    continue
+                if import_record.is_type_defs():
+                    continue
+                import_records.add(import_record.get_external(self.service_name.module_name))
+
+        return list(sorted(import_records))

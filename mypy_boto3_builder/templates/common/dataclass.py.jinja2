@@ -1,0 +1,45 @@
+{{ '@dataclass\n' -}}
+{{ 'class ' -}}
+{{ typed_dict.dataclass_name -}}
+{{ '(DataClassJsonMixin):\n' -}}
+{% set default_children = [] -%}
+{% for child in typed_dict.children -%}
+    {% if child.required and not child.reserved -%}
+        {{ '    ' -}}
+        {{ child.name -}}
+        {{ ': ' -}}
+        {{ child.type_annotation.render(typed_dict.name) -}}
+        {{ '\n' -}}
+    {% else -%}
+        {{ default_children.append(child) or '' -}}
+    {% endif -%}
+{% endfor -%}
+{% for child in default_children -%}
+    {{ '    ' -}}
+    {{ child.name -}}
+    {% if child.reserved -%}
+        {{ '_' -}}
+    {% endif -%}
+    {{ ': ' -}}
+    {% set config = [] -%}
+    {% if child.type_annotation.is_dict() -%}
+        {{ config.append('default_factory=dict') or '' -}}
+        {{ child.type_annotation.render(typed_dict.name) -}}
+    {% elif child.type_annotation.is_list() -%}
+        {{ config.append('default_factory=list') or '' -}}
+        {{ child.type_annotation.render(typed_dict.name) -}}
+    {% else -%}
+        {{ config.append('default=None') or '' -}}
+        {{ 'Optional[' -}}
+        {{ child.type_annotation.render(typed_dict.name) -}}
+        {{ ']' -}}
+    {% endif -%}
+    {% if child.reserved -%}
+        {{ config.append('metadata=config(field_name="' + child.name + '")') or '' -}}
+    {% endif -%}
+    {{ ' = field(' -}}
+    {{ config|join(', ') -}}
+    {{ ')\n' -}}
+{% endfor %}
+
+

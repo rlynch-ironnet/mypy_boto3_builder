@@ -103,6 +103,10 @@ def write_service_package(
                     package_path / ServiceModuleName.type_defs.file_name,
                     module_templates_path / ServiceModuleName.type_defs.template_name,
                 ),
+                (
+                    package_path / ServiceModuleName.dataclass_defs.file_name,
+                    module_templates_path / ServiceModuleName.dataclass_defs.template_name,
+                ),
             )
         )
 

@@ -1,6 +1,7 @@
 """
 Wrapper for `typing/typing_extensions.TypedDict` type annotations.
 """
+import keyword
 from typing import Iterable, List, Set
 
 from mypy_boto3_builder.enums.service_module_name import ServiceModuleName
@@ -24,6 +25,7 @@ class TypedDictAttribute:
         self.name = name
         self.type_annotation = type_annotation
         self.required = required
+        self.reserved = keyword.iskeyword(name)
 
     def render(self) -> str:
         """
@@ -225,3 +227,7 @@ class TypeTypedDict(FakeAnnotation):
                     continue
 
         return result
+
+    @property
+    def dataclass_name(self):
+        return self.name.replace("TypeDef", "DataClassDef")
