@@ -36,6 +36,34 @@ class TypedDictAttribute:
         """
         return f"{self.name}: {self.type_annotation.render()}"
 
+    @property
+    def render_for_dataclass(self) -> str:
+        """
+        Render attribute to use in class-based Dataclass definition.
+
+        Returns:
+            A string with argument definition.
+        """
+        name = self.name if not self.reserved else f'{self.name}_'
+        if self.required:
+            rendered = f'{name}: {self.type_annotation.render()}'
+        else:
+            rendered = f'{name}: Optional[{self.type_annotation.render()}]'
+
+        opts = []
+        if self.type_annotation.is_dict():
+            opts.append('default_factory=dict')
+        if self.type_annotation.is_list():
+            opts.append('default_factory=list')
+        if self.reserved:
+            opts.append(f'metadata=config(field_name="{self.name}")')
+        opts_joined = ', '.join(opts)
+
+        if opts_joined:
+            rendered += f' = field({opts_joined})'
+
+        return rendered.replace('TypeDef', 'DataClassDef')
+
 
 class TypeTypedDict(FakeAnnotation):
     """
